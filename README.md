@@ -29,21 +29,8 @@ if I would like to `lint` and `test` on every Grunt project one folder up:
 ```javascript
 grunt.initConfig({
   hub: {
-    'lint test': ['../*/grunt.js'],
-  }
-});
-```
-
-or using the more explicit syntax and only specifying certain Grunt projects:
-
-```javascript
-grunt.initConfig({
-  hub: {
     all: {
-      files: [
-      	'../grunt-jam/grunt.js',
-      	'../grunt-docs/grunt.js'
-      ],
+      files: ['../*/grunt.js'],
       tasks: ['lint', 'test']
     }
   }
