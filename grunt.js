@@ -5,8 +5,7 @@ module.exports = function(grunt) {
     hub: {
       //'lint test': ['../*/grunt.js'],
       all: {
-        //files: ['../*/grunt.js'],
-        files: ['../grunt-jam/grunt.js', '../grunt-docs/grunt.js'],
+        files: ['../*/grunt.js'],
         tasks: ['lint']
       }
     },

@@ -18,7 +18,7 @@ grunt.loadNpmTasks('grunt-hub');
 
 ## Documentation
 
-This module includes a `hub` task and overrides the `watch` task.
+This plugin includes a `hub` task and overrides the `watch` task.
 
 ### `hub` task
 
