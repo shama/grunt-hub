@@ -1,8 +1,22 @@
 # grunt-hub
 
-A Grunt task to watch and run tasks on multiple Grunt projects
+A Grunt task to watch and run tasks on multiple Grunt projects.
 
-## Getting Started
+## Create a Grunt Hub
+
+A Grunt Hub is just a folder with a [Gruntfile][getting_started] and this
+grunt plugin installed. To create one do:
+
+```
+mkdir grunt-hub && cd grunt-hub
+npm install grunt-hub
+cp -R node_modules/grunt-hub/tasks/init/hub/* .
+```
+
+Then edit the grunt.js file to point to your other Grunt projects and run:
+`grunt` or `grunt watch`.
+
+## Integrate With an Existing Grunt Project
 
 Install this grunt plugin next to your project's
 [Gruntfile][getting_started] with: `npm install grunt-hub`
@@ -13,10 +27,7 @@ Then add this line to your project's Gruntfile:
 grunt.loadNpmTasks('grunt-hub');
 ```
 
-[grunt]: https://github.com/cowboy/grunt
-[getting_started]: https://github.com/cowboy/grunt/blob/master/docs/getting_started.md
-
-## Documentation
+## Configuring
 
 This plugin includes a `hub` task and overrides the `watch` task.
 
@@ -65,9 +76,14 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.1.1 add copyable template for a grunt hub
 * 0.1.0 initial release
 
 ## License
 
 Copyright (c) 2012 Kyle Robinson Young  
 Licensed under the MIT license.
+
+
+[grunt]: https://github.com/cowboy/grunt
+[getting_started]: https://github.com/cowboy/grunt/blob/master/docs/getting_started.md
