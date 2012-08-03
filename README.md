@@ -16,7 +16,7 @@ cp -R node_modules/grunt-hub/tasks/init/hub/* .
 Then edit the grunt.js file to point to your other Grunt projects and run:
 `grunt` or `grunt watch`.
 
-## Integrate With an Existing Grunt Project
+### Integrate With an Existing Grunt Project
 
 Install this grunt plugin next to your project's
 [Gruntfile][getting_started] with: `npm install grunt-hub`
@@ -26,6 +26,36 @@ Then add this line to your project's Gruntfile:
 ```javascript
 grunt.loadNpmTasks('grunt-hub');
 ```
+
+## Watching Forever
+
+The common use for grunt-hub is for a development server. Where you would
+like to watch multiple projects and compile the SASS or concat/minify JS upon
+every project as you edit.
+
+Depending on your system, there are various ways to ensure the grunt-hub stays
+alive. Such as with
+[upstart and monit](http://howtonode.org/deploying-node-upstart-monit).
+
+A simple way is to use `nohup` and create a `start.sh` script:
+
+```sh
+#!/bin/sh
+DIR=`dirname $0`
+/usr/bin/nohup /usr/local/bin/grunt --config $DIR/grunt.js --base $DIR watch &
+echo "Grunt Hub Started"
+```
+
+and a `stop.sh` script:
+
+```sh
+#!/bin/sh
+ps -ef | sed -n '/grunt/{/grep/!p;}' | awk '{print$2}' | xargs -i kill {}
+echo "Grunt Hub Stopped"
+```
+
+Put these in your grunt-hub folder and run `./start.sh` to start and
+`./stop.sh` to stop.
 
 ## Configuring
 
