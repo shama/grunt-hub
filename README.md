@@ -1,3 +1,4 @@
+[![build status](https://secure.travis-ci.org/shama/grunt-hub.png)](http://travis-ci.org/shama/grunt-hub)
 # grunt-hub
 
 A Grunt task to watch and run tasks on multiple Grunt projects.
