@@ -12,16 +12,19 @@ module.exports = function(grunt) {
   // TODO: ditch this when grunt v0.4 is released
   grunt.util = grunt.util || grunt.utils;
 
+  var path = require('path');
   var async = grunt.util.async;
+  var helper = require('../lib/helper');
 
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
-    var files = grunt.helper('normalizeFiles', this).files;
-    var tasks = grunt.helper('normalizeFiles', this).tasks;
+    var gruntfiles = helper.normalizeFiles(this).files;
+    var tasks = helper.normalizeFiles(this).tasks;
     var done = this.async();
 
-    async.forEachSeries(files, function(file, next) {
+    async.forEachSeries(gruntfiles, function(gruntfile, next) {
+      gruntfile = path.resolve(gruntfile);
 
-      grunt.helper('gruntConfig', file, tasks, function(err) { next(); });
+      helper.runTasks(gruntfile, tasks, next);
 
     }, function() {
       done();

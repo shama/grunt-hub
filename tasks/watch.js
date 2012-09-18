@@ -16,8 +16,10 @@ module.exports = function(grunt) {
   var path = require('path');
   var chokidar = require('chokidar');
   var async = grunt.util.async;
+  var _ = grunt.util._;
+  var helper = require('../lib/helper');
 
-  // neuter a mock grunt except initConfig
+  // Neuter a mock grunt except initConfig
   var mockgrunt = (function() {
     var mock = {};
     var func = function() {};
@@ -31,56 +33,94 @@ module.exports = function(grunt) {
   }());
 
   grunt.registerMultiTask('watch', 'Watch multiple grunt projects', function() {
-    var files = grunt.helper('normalizeFiles', this).files;
-    var tasks = grunt.helper('normalizeFiles', this).tasks;
+    var gruntfiles = helper.normalizeFiles(this).files;
+    var tasks = helper.normalizeFiles(this).tasks;
     var done = this.async();
 
-    async.forEach(files, function(file, next) {
-      file = path.resolve(file);
+    async.forEach(gruntfiles, function(gruntfile, next) {
+      gruntfile = path.resolve(gruntfile);
 
-      // attempt to read gruntfile
+      // Attempt to read gruntfile
       try {
-        require(file)(mockgrunt);
+        require(gruntfile)(mockgrunt);
       } catch (e) {
-        grunt.log.error(file);
+        grunt.log.error(gruntfile);
         grunt.log.error(e.message);
-      }
-
-      var config = grunt.config.init(mockgrunt.config);
-      if (!config.watch || !config.watch.files) {
         return next();
       }
 
-      // gather watch tasks and files from gruntfile
-      var watchTasks = config.watch.tasks;
-      var watchFiles = config.watch.files.map(function(watchFile) {
-        return path.join(path.dirname(file), watchFile);
-      });
-      watchFiles = grunt.file.expandFiles(watchFiles);
+      // Parse gruntfile config for tasks and files
+      var config = grunt.config.init(mockgrunt.config);
+      var targets = helper.getTargets(config);
+      var patterns = _.chain(targets).pluck('files').flatten().value();
 
-      // watch them files
-      grunt.log.writeln('watching '.cyan + file + '...');
-      var throttle = false;
-      var watcher = chokidar.watch(watchFiles);
-      watcher.on('all', function(action, filepath) {
+      // Get directories to watch
+      var watchDirs = _.uniq(grunt.file.expandFiles(patterns).map(function(file) {
+        return path.resolve(path.dirname(gruntfile), path.dirname(file));
+      }));
 
-        if (!throttle) {
-          throttle = true;
-          grunt.helper('gruntConfig', file, watchTasks, function(err) {
-            setTimeout(function() { throttle = false; }, 1000);
-          });
+      // Keep track of changed files
+      var changedFiles = {};
+
+      // Watch them folders
+      var watcher = chokidar.watch(watchDirs);
+
+      // On change/unlink/added
+      watcher.on('all', function(status, filepath) {
+
+        // Bring back to relative path for matching
+        filepath = path.relative(path.dirname(gruntfile), filepath);
+
+        // Is a matching file?
+        if (grunt.file.isMatch(patterns, filepath)) {
+          changedFiles[filepath] = status;
+          hasChanged();
         }
-
       });
+
+      // Run tasks on changed files
+      var hasChanged = _.debounce(function() {
+        grunt.log.ok();
+
+        // Process, report and clear require cache for changed files
+        var fileArray = Object.keys(changedFiles);
+        fileArray.forEach(function(filepath) {
+          var status = changedFiles[filepath];
+          // Log which file has changed, and how.
+          grunt.log.ok('File "' + filepath + '" ' + status + '.');
+          // Clear the modified file's cached require data.
+          grunt.file.clearRequireCache(filepath);
+        });
+
+        // Find the tasks we should run
+        var runTasks = (tasks !== '0') ? tasks : (function() {
+          var returnTasks = [];
+          targets.forEach(function(target) {
+            // What files in fileArray match the target.files pattern(s)?
+            var files = grunt.file.match(target.files, fileArray);
+            // Enqueue specified tasks if at least one matching file was found.
+            if (files.length > 0 && target.tasks) {
+              returnTasks.push(target.tasks);
+           }
+          });
+          return returnTasks;
+        }());
+
+        // Actually run the tasks!
+        helper.runTasks(gruntfile, _.flatten(runTasks));
+      }, 250);
+
+      // On watcher error
       watcher.on('error', function(err) {
         grunt.log.error(err.message);
       });
 
+      // Process the next gruntfile
+      next();
     });
 
     // keep alive
     setInterval(function() {}, 1000);
-    
   });
 
 };

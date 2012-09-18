@@ -12,6 +12,9 @@ module.exports = function(grunt) {
     watch: '<config:hub.all.files>',
     lint: {
       files: ['grunt.js', 'tasks/*.js']
+    },
+    test: {
+      all: ['test/**/*_test.js']
     }
   });
 

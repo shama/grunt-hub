@@ -82,17 +82,24 @@ grunt.initConfig({
 
 The watch task is for watching multiple Grunt projects and triggering tasks on
 the respective Grunt project as files are edited. This watch task will read each
-project's Gruntfile and use each `watch` config to determine which files to watch
-and which tasks to run.
+project's Gruntfile. If you specify `tasks` it will run only those tasks
+otherwise if no `tasks` are specified it will run all and each of the project's
+watch targets.
 
 To specify which Gruntfiles this watch task should read use:
 
 ```javascript
 grunt.initConfig({
-  watch: '../*/grunt.js',
+  watch: {
+    all: {
+      files: ['../*/grunt.js'],
+      tasks: ['lint', 'test']
+    }
+  }
 });
 ```
-or if you're using the above `hub` config, simply:
+or if you're using the above `hub` config and would like to run all the watch
+targets of the projects, use:
 
 ```javascript
 grunt.initConfig({
@@ -106,6 +113,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.2.0 refactor: make easier to upgrade to Grunt v0.4, windows support, fix issue with mutliple watch targets
 * 0.1.1 add copyable template for a grunt hub
 * 0.1.0 initial release
 
