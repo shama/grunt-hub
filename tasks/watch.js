@@ -5,7 +5,6 @@
  * Copyright (c) 2012 Kyle Robinson Young
  * Licensed under the MIT license.
  */
-/*jshint node:true*/
 
 module.exports = function(grunt) {
   'use strict';
@@ -13,11 +12,15 @@ module.exports = function(grunt) {
   // TODO: ditch this when grunt v0.4 is released
   grunt.util = grunt.util || grunt.utils;
 
-  var path = require('path');
-  var chokidar = require('chokidar');
   var async = grunt.util.async;
   var _ = grunt.util._;
-  var helper = require('../lib/helper');
+  var hub = require('./lib/hub').init(grunt);
+  var path = require('path');
+  var Gaze = require('gaze').Gaze;
+
+  // Find the grunt bin
+  var gruntBin = path.resolve(process.cwd(), 'node_modules', '.bin', 'grunt');
+  if (process.platform === 'win32') { gruntBin += '.cmd'; }
 
   // Neuter a mock grunt except initConfig
   var mockgrunt = (function() {
@@ -29,98 +32,124 @@ module.exports = function(grunt) {
     mock.initConfig = function(cfg) {
       this.config = cfg;
     };
+    // Grunt v0.4 compat
+    mock.unregisterTasks = function() {};
     return mock;
   }());
 
-  grunt.registerMultiTask('watch', 'Watch multiple grunt projects', function() {
-    var gruntfiles = helper.normalizeFiles(this).files;
-    var tasks = helper.normalizeFiles(this).tasks;
+  grunt.registerTask('watch', 'Watch multiple grunt projects', function(target) {
+    this.requiresConfig('watch');
+    // Build an array of files/tasks objects
+    var targets = hub.getTargets.apply(this, [grunt.config('watch'), target]);
+
+    // Message to display when waiting for changes
+    var waiting = 'Waiting...';
+    // File changes to be logged.
+    var changedFiles = Object.create(null);
+    // List of changed / deleted file paths.
+    grunt.file.watchFiles = {changed: [], deleted: [], added: []};
+
+    // Call to close this task
     var done = this.async();
 
-    async.forEach(gruntfiles, function(gruntfile, next) {
-      gruntfile = path.resolve(gruntfile);
+    // Run the tasks for the changed files
+    var runTasks = grunt.util._.debounce(function runTasks(gruntfile, tasks) {
+      grunt.log.ok();
+      var fileArray = Object.keys(changedFiles);
+      fileArray.forEach(function(filepath) {
+        var status = changedFiles[filepath];
+        // Log which file has changed, and how.
+        grunt.log.ok('File "' + filepath + '" ' + status + '.');
+        // Add filepath to grunt.file.watchFiles for grunt.file.expand* methods.
+        grunt.file.watchFiles[status].push(filepath);
+      });
+      changedFiles = Object.create(null);
+      // Spawn the tasks as a child process
+      grunt.util.spawn({
+        cmd: gruntBin,
+        opts: {cwd: path.dirname(gruntfile)},
+        args: grunt.util._.union(tasks, [].slice.call(process.argv, 3))
+      }, function(err, res, code) {
+        if (code !== 0) { grunt.log.error(res.stderr); }
+        grunt.log.writeln(res.stdout).writeln('').write(waiting);
+      });
+    }, 250);
 
-      // Attempt to read gruntfile
-      try {
-        require(gruntfile)(mockgrunt);
-      } catch (e) {
-        grunt.log.error(gruntfile);
-        grunt.log.error(e.message);
-        return next();
+    // Get gruntfiles and their watch targets
+    var gruntfiles = Object.create(null);
+    targets.forEach(function(target) {
+      if (typeof target.files === 'string') {
+        target.files = [target.files];
       }
+      grunt.file.expandFiles(target.files).forEach(function(gruntfile) {
+        gruntfile = path.resolve(process.cwd(), gruntfile);
 
-      // Parse gruntfile config for tasks and files
-      var config = grunt.config.init(mockgrunt.config);
-      var targets = helper.getTargets(config);
-      var patterns = _.chain(targets).pluck('files').flatten().value();
-
-      // Get directories to watch
-      var watchDirs = _.uniq(grunt.file.expandFiles(patterns).map(function(file) {
-        return path.resolve(path.dirname(gruntfile), path.dirname(file));
-      }));
-
-      // Keep track of changed files
-      var changedFiles = {};
-
-      // Watch them folders
-      var watcher = chokidar.watch(watchDirs);
-
-      // On change/unlink/added
-      watcher.on('all', function(status, filepath) {
-
-        // Bring back to relative path for matching
-        filepath = path.relative(path.dirname(gruntfile), filepath);
-
-        // Is a matching file?
-        if (grunt.file.isMatch(patterns, filepath)) {
-          changedFiles[filepath] = status;
-          hasChanged();
+        // Attempt to read gruntfile
+        try {
+          require(gruntfile)(mockgrunt);
+        } catch (e) {
+          grunt.log.error(gruntfile);
+          grunt.log.error(e.message);
+          return;
         }
-      });
 
-      // Run tasks on changed files
-      var hasChanged = _.debounce(function() {
-        grunt.log.ok();
+        // Read watch in other config
+        var config = grunt.config.init(mockgrunt.config);
+        if (!config.watch) {
+          grunt.log.error('No watch target defined in ' + gruntfile);
+          return;
+        }
 
-        // Process, report and clear require cache for changed files
-        var fileArray = Object.keys(changedFiles);
-        fileArray.forEach(function(filepath) {
-          var status = changedFiles[filepath];
-          // Log which file has changed, and how.
-          grunt.log.ok('File "' + filepath + '" ' + status + '.');
-          // Clear the modified file's cached require data.
-          grunt.file.clearRequireCache(filepath);
-        });
-
-        // Find the tasks we should run
-        var runTasks = (tasks !== '0') ? tasks : (function() {
-          var returnTasks = [];
-          targets.forEach(function(target) {
-            // What files in fileArray match the target.files pattern(s)?
-            var files = grunt.file.match(target.files, fileArray);
-            // Enqueue specified tasks if at least one matching file was found.
-            if (files.length > 0 && target.tasks) {
-              returnTasks.push(target.tasks);
-           }
+        // Process the remote targets
+        var _targets = _.chain(hub.getTargets(config.watch)).map(function(_target) {
+          // If tasks specified local, run that instead of remote
+          if (target.tasks) {
+            _target.tasks = target.tasks;
+          }
+          if (typeof _target.files === 'string') {
+            _target.files = [_target.files];
+          }
+          // Process templates for remote files
+          _target.files = grunt.util.recurse(_target.files, function(f) {
+            if (typeof f !== 'string') { return f; }
+            return grunt.template.process(f, config);
           });
-          return returnTasks;
-        }());
+          return _target;
+        }).value();
 
-        // Actually run the tasks!
-        helper.runTasks(gruntfile, _.flatten(runTasks));
-      }, 250);
-
-      // On watcher error
-      watcher.on('error', function(err) {
-        grunt.log.error(err.message);
+        gruntfiles[gruntfile] = _targets;
       });
-
-      // Process the next gruntfile
-      next();
     });
 
-    // keep alive
-    setInterval(function() {}, 1000);
+    // Start watching files
+    Object.keys(gruntfiles).forEach(function(gruntfile) {
+      var targets = gruntfiles[gruntfile];
+      grunt.log.ok('Watching ' + gruntfile + ' targets...');
+      targets.forEach(function(target) {
+        if (typeof target.files === 'string') {
+          target.files = [target.files];
+        }
+        var patterns = grunt.util._.chain(target.files).flatten().uniq().value();
+        var gaze = new Gaze(patterns, {
+          cwd: path.dirname(gruntfile)
+        }, function(err) {
+          if (err) {
+            grunt.log.error(err.message);
+            return done();
+          }
+          // On changed/added/deleted
+          this.on('all', function(status, filepath) {
+            changedFiles[filepath] = status;
+            runTasks(gruntfile, target.tasks);
+          });
+          // On watcher error
+          this.on('error', function(err) { grunt.log.error(err); });
+        });
+      });
+    });
+
+    // Keep the process alive
+    setInterval(function() {}, 250);
   });
 
 };

@@ -3,13 +3,17 @@ module.exports = function(grunt) {
 
   grunt.initConfig({
     hub: {
-      //'lint test': ['../*/grunt.js'],
       all: {
-        files: ['../*/grunt.js'],
+        src: ['../*/grunt.js'],
         tasks: ['lint']
       }
     },
-    watch: '<config:hub.all.files>',
+    watch: {
+      all: {
+        files: '<config:hub.all.src>',
+        tasks: ['lint']
+      }
+    },
     lint: {
       files: ['grunt.js', 'tasks/*.js']
     },

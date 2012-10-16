@@ -1,7 +1,7 @@
 /**
  * Example Grunt Hub
  *
- * Edit the hub.all.files to point to your Gruntfile locations.
+ * Edit the hub.all.src to point to your Gruntfile locations.
  * Then run `grunt` or `grunt watch`.
  */
 module.exports = function(grunt) {
@@ -10,11 +10,16 @@ module.exports = function(grunt) {
   grunt.initConfig({
     hub: {
       all: {
-        files: ['../*/grunt.js'],
+        src: ['../*/grunt.js'],
         tasks: ['lint']
       }
     },
-    watch: '<config:hub.all.files>'
+    watch: {
+      all: {
+        files: ['<config:hub.all.files>'],
+        tasks: ['lint']
+      }
+    }
   });
 
   grunt.loadNpmTasks('grunt-hub');

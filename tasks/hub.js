@@ -12,23 +12,39 @@ module.exports = function(grunt) {
   // TODO: ditch this when grunt v0.4 is released
   grunt.util = grunt.util || grunt.utils;
 
+  var helpers = require('grunt-lib-contrib').init(grunt);
   var path = require('path');
-  var async = grunt.util.async;
-  var helper = require('../lib/helper');
+
+  // Find the grunt bin
+  var gruntBin = path.resolve(process.cwd(), 'node_modules', '.bin', 'grunt');
+  if (process.platform === 'win32') { gruntBin += '.cmd'; }
 
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
-    var gruntfiles = helper.normalizeFiles(this).files;
-    var tasks = helper.normalizeFiles(this).tasks;
+    var options = helpers.options(this);
+    grunt.verbose.writeflags(options, 'Options');
+
+    // TODO: ditch this when grunt v0.4 is released
+    this.files = this.files || helpers.normalizeMultiTaskFiles(this.data, this.target);
+
     var done = this.async();
+    var tasks = this.data.tasks || 'default';
 
-    async.forEachSeries(gruntfiles, function(gruntfile, next) {
-      gruntfile = path.resolve(gruntfile);
-
-      helper.runTasks(gruntfile, tasks, next);
-
-    }, function() {
-      done();
-    });
+    grunt.util.async.forEachSeries(this.files, function(files, next) {
+      var gruntfiles = grunt.file.expandFiles(files.src);
+      grunt.util.async.forEachSeries(gruntfiles, function(gruntfile, n) {
+        grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
+        // Spawn the tasks
+        grunt.util.spawn({
+          cmd: gruntBin,
+          opts: {cwd: path.dirname(gruntfile)},
+          args: grunt.util._.union(tasks, [].slice.call(process.argv, 3))
+        }, function(err, res, code) {
+          if (code !== 0) { grunt.log.error(res.stderr); }
+          grunt.log.writeln(res.stdout).writeln('');
+          n();
+        });
+      }, next);
+    }, done);
     
   });
 
