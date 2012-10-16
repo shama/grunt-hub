@@ -117,7 +117,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
-* 0.3.0 Use [gaze][https://github.com/shama/gaze] for watching, Grunt v0.4 compatibility
+* 0.3.0 Use [gaze](https://github.com/shama/gaze) for watching, Grunt v0.4 compatibility
 * 0.2.0 refactor: make easier to upgrade to Grunt v0.4, windows support, fix issue with mutliple watch targets
 * 0.1.1 add copyable template for a grunt hub
 * 0.1.0 initial release
