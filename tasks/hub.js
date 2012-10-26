@@ -37,7 +37,7 @@ module.exports = function(grunt) {
         grunt.util.spawn({
           cmd: gruntBin,
           opts: {cwd: path.dirname(gruntfile)},
-          args: grunt.util._.union(tasks, [].slice.call(process.argv, 3))
+          args: grunt.util._.union(tasks, [].slice.call(process.argv, 2))
         }, function(err, res, code) {
           if (code !== 0) { grunt.log.error(res.stderr); }
           grunt.log.writeln(res.stdout).writeln('');
