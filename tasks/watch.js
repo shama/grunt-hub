@@ -18,9 +18,10 @@ module.exports = function(grunt) {
   var path = require('path');
   var Gaze = require('gaze').Gaze;
 
-  // Find the grunt bin
-  var gruntBin = path.resolve(process.cwd(), 'node_modules', '.bin', 'grunt');
-  if (process.platform === 'win32') { gruntBin += '.cmd'; }
+  // Default options for the watch task
+  var defaults = {
+    interrupt: false
+  };
 
   // Neuter a mock grunt except initConfig
   var mockgrunt = (function() {
@@ -46,6 +47,8 @@ module.exports = function(grunt) {
     var waiting = 'Waiting...';
     // File changes to be logged.
     var changedFiles = Object.create(null);
+    // Keep track of spawns per tasks
+    var spawned = Object.create(null);
     // List of changed / deleted file paths.
     grunt.file.watchFiles = {changed: [], deleted: [], added: []};
 
@@ -53,26 +56,42 @@ module.exports = function(grunt) {
     var done = this.async();
 
     // Run the tasks for the changed files
-    var runTasks = grunt.util._.debounce(function runTasks(gruntfile, tasks) {
-      grunt.log.ok();
-      var fileArray = Object.keys(changedFiles);
-      fileArray.forEach(function(filepath) {
-        var status = changedFiles[filepath];
-        // Log which file has changed, and how.
-        grunt.log.ok('File "' + filepath + '" ' + status + '.');
-        // Add filepath to grunt.file.watchFiles for grunt.file.expand* methods.
-        grunt.file.watchFiles[status].push(filepath);
-      });
-      changedFiles = Object.create(null);
-      // Spawn the tasks as a child process
-      grunt.util.spawn({
-        cmd: gruntBin,
-        opts: {cwd: path.dirname(gruntfile)},
-        args: grunt.util._.union(tasks, [].slice.call(process.argv, 2))
-      }, function(err, res, code) {
-        if (code !== 0) { grunt.log.error(res.stderr); }
-        grunt.log.writeln(res.stdout).writeln('').write(waiting);
-      });
+    var runTasks = grunt.util._.debounce(function runTasks(i, gruntfile, tasks, options) {
+      // If interrupted, reset the spawned for a target
+      if (options.interrupt && typeof spawned[i] === 'object') {
+        grunt.log.writeln('').write('Previously spawned task has been interrupted...'.yellow);
+        spawned[i].kill('SIGINT');
+        delete spawned[i];
+      }
+      // Only spawn one at a time unless interrupt is specified
+      if (!spawned[i]) {
+        grunt.log.ok();
+        var fileArray = Object.keys(changedFiles);
+        fileArray.forEach(function(filepath) {
+          var status = changedFiles[filepath];
+          // Log which file has changed, and how.
+          grunt.log.ok('File "' + filepath + '" ' + status + '.');
+          // Add filepath to grunt.file.watchFiles for grunt.file.expand* methods.
+          grunt.file.watchFiles[status].push(filepath);
+        });
+        changedFiles = Object.create(null);
+        // Spawn the tasks as a child process
+        spawned[i] = grunt.util.spawn({
+          // Use the node that spawned this process
+          cmd: process.argv[0],
+          // Run from current working dir
+          opts: {cwd: path.dirname(gruntfile)},
+          // Run grunt this process uses, append the task to be run and any cli options
+          args: grunt.util._.union([process.argv[1]].concat(tasks), [].slice.call(process.argv, 2))
+        }, function(err, res, code) {
+          // Spawn is done
+          delete spawned[i];
+          grunt.log.writeln('').write(waiting);
+        });
+        // Display stdout/stderr immediately
+        spawned[i].stdout.on('data', function(buf) { grunt.log.write(String(buf)); });
+        spawned[i].stderr.on('data', function(buf) { grunt.log.error(String(buf)); });
+      }
     }, 250);
 
     // Get gruntfiles and their watch targets
@@ -122,7 +141,7 @@ module.exports = function(grunt) {
     });
 
     // Start watching files
-    Object.keys(gruntfiles).forEach(function(gruntfile) {
+    Object.keys(gruntfiles).forEach(function(gruntfile, i) {
       var targets = gruntfiles[gruntfile];
       grunt.log.ok('Watching ' + gruntfile + ' targets...');
       targets.forEach(function(target) {
@@ -130,9 +149,9 @@ module.exports = function(grunt) {
           target.files = [target.files];
         }
         var patterns = grunt.util._.chain(target.files).flatten().uniq().value();
-        var gaze = new Gaze(patterns, {
-          cwd: path.dirname(gruntfile)
-        }, function(err) {
+        var options = grunt.util._.defaults(target.options || {}, defaults);
+        options.cwd = path.dirname(gruntfile);
+        var gaze = new Gaze(patterns, options, function(err) {
           if (err) {
             grunt.log.error(err.message);
             return done();
@@ -140,7 +159,7 @@ module.exports = function(grunt) {
           // On changed/added/deleted
           this.on('all', function(status, filepath) {
             changedFiles[filepath] = status;
-            runTasks(gruntfile, target.tasks);
+            runTasks(i, gruntfile, target.tasks, options);
           });
           // On watcher error
           this.on('error', function(err) { grunt.log.error(err); });
