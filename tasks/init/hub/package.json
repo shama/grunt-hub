@@ -1,4 +1,7 @@
 {
-  "name": "grunt-hub",
-  "version": "0.1.0"
+  "name": "my-grunt-hub",
+  "version": "0.1.0",
+  "devDependencies": {
+  	"grunt": "~0.4.0a"
+  }
 }

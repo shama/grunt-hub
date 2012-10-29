@@ -42,7 +42,7 @@ A simple way is to use `nohup` and create a `start.sh` script:
 ```sh
 #!/bin/sh
 DIR=`dirname $0`
-/usr/bin/nohup /usr/local/bin/grunt --config $DIR/grunt.js --base $DIR watch &
+/usr/bin/nohup /usr/local/bin/grunt --base $DIR watch &
 echo "Grunt Hub Started"
 ```
 
@@ -71,8 +71,8 @@ if I would like to `lint` and `test` on every Grunt project one folder up:
 grunt.initConfig({
   hub: {
     all: {
-      src: ['../*/grunt.js'],
-      tasks: ['lint', 'test']
+      src: ['../*/Gruntfile.js'],
+      tasks: ['jshint', 'nodeunit']
     }
   }
 });
@@ -94,8 +94,8 @@ To specify which Gruntfiles this watch task should read use:
 grunt.initConfig({
   watch: {
     all: {
-      files: ['../*/grunt.js'],
-      tasks: ['lint', 'test']
+      files: ['../*/Gruntfile.js'],
+      tasks: ['jshint', 'nodeunit']
     }
   }
 });
@@ -106,7 +106,7 @@ targets of the projects, use:
 ```javascript
 grunt.initConfig({
   watch: {
-    files: '<config:hub.all.src>'
+    files: '<%= hub.all.src %>'
   }
 });
 ```
@@ -117,6 +117,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.3.1 Update to gaze@0.2.0. Only spawn one at a time. Add `interrupt` option. Allow `tasks` to be undefined. Update to run on Grunt v0.4.
 * 0.3.0 Use [gaze](https://github.com/shama/gaze) for watching, Grunt v0.4 compatibility
 * 0.2.0 refactor: make easier to upgrade to Grunt v0.4, windows support, fix issue with mutliple watch targets
 * 0.1.1 add copyable template for a grunt hub
