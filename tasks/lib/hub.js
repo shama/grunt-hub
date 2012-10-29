@@ -19,7 +19,7 @@ exports.init = function(grunt) {
     targets = targets.map(function(target) {
       // Fail if any required config properties have been omitted
       target = ['watch', target];
-      this.requiresConfig && this.requiresConfig(target.concat('files'), target.concat('tasks'));
+      this.requiresConfig && this.requiresConfig(target.concat('files'));
       return grunt.config(target);
     }, this);
 
