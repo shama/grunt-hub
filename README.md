@@ -42,7 +42,7 @@ A simple way is to use `nohup` and create a `start.sh` script:
 ```sh
 #!/bin/sh
 DIR=`dirname $0`
-/usr/bin/nohup /usr/local/bin/grunt --base $DIR watch &
+/usr/bin/nohup /usr/local/bin/grunt --base $DIR watch --no-color &
 echo "Grunt Hub Started"
 ```
 
