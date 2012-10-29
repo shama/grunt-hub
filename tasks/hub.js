@@ -15,10 +15,6 @@ module.exports = function(grunt) {
   var helpers = require('grunt-lib-contrib').init(grunt);
   var path = require('path');
 
-  // Find the grunt bin
-  var gruntBin = path.resolve(process.cwd(), 'node_modules', '.bin', 'grunt');
-  if (process.platform === 'win32') { gruntBin += '.cmd'; }
-
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
     var options = helpers.options(this);
     grunt.verbose.writeflags(options, 'Options');
@@ -35,9 +31,12 @@ module.exports = function(grunt) {
         grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
         // Spawn the tasks
         grunt.util.spawn({
-          cmd: gruntBin,
+          // Use the node that spawned this process
+          cmd: process.argv[0],
+          // Run from dirname of gruntfile
           opts: {cwd: path.dirname(gruntfile)},
-          args: grunt.util._.union(tasks, [].slice.call(process.argv, 2))
+          // Run grunt this process uses, append the task to be run and any cli options
+          args: grunt.util._.union([process.argv[1]].concat(tasks), [].slice.call(process.argv, 2))
         }, function(err, res, code) {
           if (code !== 0) { grunt.log.error(res.stderr); }
           grunt.log.writeln(res.stdout).writeln('');

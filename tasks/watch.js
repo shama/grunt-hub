@@ -79,7 +79,7 @@ module.exports = function(grunt) {
         spawned[i] = grunt.util.spawn({
           // Use the node that spawned this process
           cmd: process.argv[0],
-          // Run from current working dir
+          // Run from dirname of gruntfile
           opts: {cwd: path.dirname(gruntfile)},
           // Run grunt this process uses, append the task to be run and any cli options
           args: grunt.util._.union([process.argv[1]].concat(tasks), [].slice.call(process.argv, 2))
@@ -149,8 +149,13 @@ module.exports = function(grunt) {
           target.files = [target.files];
         }
         var patterns = grunt.util._.chain(target.files).flatten().uniq().value();
+
+        // Options for operations on this gruntfile
         var options = grunt.util._.defaults(target.options || {}, defaults);
         options.cwd = path.dirname(gruntfile);
+        grunt.verbose.writeflags(options, 'Options');
+
+        // Create watcher
         var gaze = new Gaze(patterns, options, function(err) {
           if (err) {
             grunt.log.error(err.message);
