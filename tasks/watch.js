@@ -51,12 +51,15 @@ module.exports = function(grunt) {
     var spawned = Object.create(null);
     // List of changed / deleted file paths.
     grunt.file.watchFiles = {changed: [], deleted: [], added: []};
+    // Get process.argv options without grunt.cli.tasks to pass to child processes
+    var cliArgs = grunt.util._.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
 
     // Call to close this task
     var done = this.async();
 
     // Run the tasks for the changed files
-    var runTasks = grunt.util._.debounce(function runTasks(i, gruntfile, tasks, options) {
+    var runTasks = grunt.util._.debounce(function runTasks(i, tasks, options) {
+      tasks = tasks || [];
       // If interrupted, reset the spawned for a target
       if (options.interrupt && typeof spawned[i] === 'object') {
         grunt.log.writeln('').write('Previously spawned task has been interrupted...'.yellow);
@@ -80,9 +83,9 @@ module.exports = function(grunt) {
           // Use the node that spawned this process
           cmd: process.argv[0],
           // Run from dirname of gruntfile
-          opts: {cwd: path.dirname(gruntfile)},
+          opts: {cwd: options.cwd},
           // Run grunt this process uses, append the task to be run and any cli options
-          args: grunt.util._.union([process.argv[1]].concat(tasks), [].slice.call(process.argv, 2))
+          args: grunt.util._.union([process.argv[1]].concat(tasks), cliArgs)
         }, function(err, res, code) {
           // Spawn is done
           delete spawned[i];
@@ -96,12 +99,17 @@ module.exports = function(grunt) {
 
     // Get gruntfiles and their watch targets
     var gruntfiles = Object.create(null);
+    var ownGruntfile = grunt.option('gruntfile') || grunt.file.expandFiles('{G,g}runtfile.{js,coffee}')[0];
+    ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
     targets.forEach(function(target) {
       if (typeof target.files === 'string') {
         target.files = [target.files];
       }
       grunt.file.expandFiles(target.files).forEach(function(gruntfile) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
+
+        // Skip it's own gruntfile. Prevents infinite loops.
+        if (gruntfile === ownGruntfile) { return; }
 
         // Attempt to read gruntfile
         try {
@@ -164,7 +172,7 @@ module.exports = function(grunt) {
           // On changed/added/deleted
           this.on('all', function(status, filepath) {
             changedFiles[filepath] = status;
-            runTasks(i, gruntfile, target.tasks, options);
+            runTasks(i, target.tasks, options);
           });
           // On watcher error
           this.on('error', function(err) { grunt.log.error(err); });

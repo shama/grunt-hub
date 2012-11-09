@@ -117,6 +117,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.3.3 Fix issue with grunt-hub passing it's own tasks. Minor refactoring.
 * 0.3.2 Fix dep to `grunt-lib-contrib`. Include options in verbose output. Better spawn grunt in hub task.
 * 0.3.1 Update to gaze@0.2.0. Only spawn one at a time. Add `interrupt` option. Allow `tasks` to be undefined. Update to run on Grunt v0.4.
 * 0.3.0 Use [gaze](https://github.com/shama/gaze) for watching, Grunt v0.4 compatibility

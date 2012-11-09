@@ -14,19 +14,16 @@ module.exports = function(grunt) {
       }
     },
     jshint: {
-      files: ['Gruntfile.js', 'tasks/*.js']
-    },
-    nodeunit: {
-      all: ['test/**/*_test.js']
+      files: ['Gruntfile.js', 'tasks/*.js'],
+      options: { jshintrc: '.jshintrc' }
     }
   });
 
   // Load external tasks
   grunt.loadNpmTasks('grunt-contrib-jshint');
-  grunt.loadNpmTasks('grunt-contrib-nodeunit');
 
   // Load watch and hub tasks
   grunt.loadTasks('tasks');
   
-  grunt.registerTask('default', ['hub']);
+  grunt.registerTask('default', ['jshint']);
 };
