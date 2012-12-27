@@ -39,9 +39,10 @@ module.exports = function(grunt) {
   }());
 
   grunt.registerTask('watch', 'Watch multiple grunt projects', function(target) {
-    this.requiresConfig('watch');
+    var name = this.name || 'watch';
+    this.requiresConfig(name);
     // Build an array of files/tasks objects
-    var targets = hub.getTargets.apply(this, [grunt.config('watch'), target]);
+    var targets = hub.getTargets.apply(this, [grunt.config(name), target, name]);
 
     // Message to display when waiting for changes
     var waiting = 'Waiting...';
