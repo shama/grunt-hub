@@ -100,13 +100,13 @@ module.exports = function(grunt) {
 
     // Get gruntfiles and their watch targets
     var gruntfiles = Object.create(null);
-    var ownGruntfile = grunt.option('gruntfile') || grunt.file.expandFiles('{G,g}runtfile.{js,coffee}')[0];
+    var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
     targets.forEach(function(target) {
       if (typeof target.files === 'string') {
         target.files = [target.files];
       }
-      grunt.file.expandFiles(target.files).forEach(function(gruntfile) {
+      grunt.file.expand({filter: 'isFile'}, target.files).forEach(function(gruntfile) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
         // Skip it's own gruntfile. Prevents infinite loops.
