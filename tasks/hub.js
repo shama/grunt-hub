@@ -27,11 +27,11 @@ module.exports = function(grunt) {
     // Get process.argv options without grunt.cli.tasks to pass to child processes
     var cliArgs = grunt.util._.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
     // Get it's own gruntfile
-    var ownGruntfile = grunt.option('gruntfile') || grunt.file.expandFiles('{G,g}runtfile.{js,coffee}')[0];
+    var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
 
     grunt.util.async.forEachSeries(this.files, function(files, next) {
-      var gruntfiles = grunt.file.expandFiles(files.src);
+      var gruntfiles = grunt.file.expand({filter: 'isFile'}, files.src);
       grunt.util.async.forEachSeries(gruntfiles, function(gruntfile, n) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
