@@ -24,6 +24,6 @@ module.exports = function(grunt) {
 
   // Load watch and hub tasks
   grunt.loadTasks('tasks');
-  
+
   grunt.registerTask('default', ['jshint']);
 };
