@@ -23,6 +23,7 @@ module.exports = function(grunt) {
     this.files = this.files || helpers.normalizeMultiTaskFiles(this.data, this.target);
 
     var done = this.async();
+    var errorCount = 0;
     var tasks = this.data.tasks || 'default';
     // Get process.argv options without grunt.cli.tasks to pass to child processes
     var cliArgs = grunt.util._.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
@@ -49,12 +50,18 @@ module.exports = function(grunt) {
           // Run grunt this process uses, append the task to be run and any cli options
           args: grunt.util._.union([process.argv[1]].concat(tasks), cliArgs)
         }, function(err, res, code) {
-          if (code !== 0) { grunt.log.error(res.stderr); }
+          if (code !== 0) {
+            errorCount++;
+            grunt.log.error(res.stderr);
+          }
           grunt.log.writeln(res.stdout).writeln('');
           n();
         });
       }, next);
-    }, done);
+    }, function () {
+        var withoutErrors = (errorCount === 0);
+        done(withoutErrors);
+    });
     
   });
 
