@@ -117,6 +117,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.3.6 Propagate exit codes. Thanks @wachunga!
 * 0.3.5 Update for latest grunt. Thanks @akinofftz!
 * 0.3.4 Allow watch task to be renamed.
 * 0.3.3 Fix issue with grunt-hub passing it's own tasks. Minor refactoring.
