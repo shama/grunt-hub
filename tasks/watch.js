@@ -2,19 +2,16 @@
  * grunt-hub
  * https://github.com/shama/grunt-hub
  *
- * Copyright (c) 2012 Kyle Robinson Young
+ * Copyright (c) 2013 Kyle Robinson Young
  * Licensed under the MIT license.
  */
 
 module.exports = function(grunt) {
   'use strict';
 
-  // TODO: ditch this when grunt v0.4 is released
-  grunt.util = grunt.util || grunt.utils;
-
   var async = grunt.util.async;
   var _ = grunt.util._;
-  var hub = require('./lib/hub').init(grunt);
+  var hub = require('./lib/hub');
   var path = require('path');
   var Gaze = require('gaze').Gaze;
 

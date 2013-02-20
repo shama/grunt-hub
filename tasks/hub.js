@@ -2,25 +2,18 @@
  * grunt-hub
  * https://github.com/shama/grunt-hub
  *
- * Copyright (c) 2012 Kyle Robinson Young
+ * Copyright (c) 2013 Kyle Robinson Young
  * Licensed under the MIT license.
  */
 
 module.exports = function(grunt) {
   'use strict';
 
-  // TODO: ditch this when grunt v0.4 is released
-  grunt.util = grunt.util || grunt.utils;
-
-  var helpers = require('grunt-lib-contrib').init(grunt);
   var path = require('path');
 
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
-    var options = helpers.options(this);
+    var options = this.options();
     grunt.verbose.writeflags(options, 'Options');
-
-    // TODO: ditch this when grunt v0.4 is released
-    this.files = this.files || helpers.normalizeMultiTaskFiles(this.data, this.target);
 
     var done = this.async();
     var errorCount = 0;
@@ -59,10 +52,10 @@ module.exports = function(grunt) {
         });
       }, next);
     }, function () {
-        var withoutErrors = (errorCount === 0);
-        done(withoutErrors);
+      var withoutErrors = (errorCount === 0);
+      done(withoutErrors);
     });
-    
+
   });
 
 };
