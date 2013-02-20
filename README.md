@@ -117,6 +117,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.4.0 Support for Grunt v0.4.
 * 0.3.6 Propagate exit codes. Thanks @wachunga!
 * 0.3.5 Update for latest grunt. Thanks @akinofftz!
 * 0.3.4 Allow watch task to be renamed.
@@ -134,5 +135,5 @@ Copyright (c) 2012 Kyle Robinson Young
 Licensed under the MIT license.
 
 
-[grunt]: https://github.com/cowboy/grunt
-[getting_started]: https://github.com/cowboy/grunt/blob/master/docs/getting_started.md
+[grunt]: https://github.com/gruntjs/grunt
+[getting_started]: http://gruntjs.com/getting-started

@@ -1,7 +1,7 @@
 {
   "name": "grunt-hub",
   "description": "A Grunt task to watch and run tasks on multiple Grunt projects",
-  "version": "0.3.6",
+  "version": "0.4.0",
   "homepage": "https://github.com/shama/grunt-hub",
   "author": {
     "name": "Kyle Robinson Young",
@@ -22,7 +22,6 @@
     }
   ],
   "main": "Gruntfile.js",
-  "bin": "bin/grunt-hub",
   "engines": {
     "node": ">= 0.8.0"
   },
@@ -30,12 +29,11 @@
     "test": "grunt nodeunit -v"
   },
   "dependencies": {
-    "gaze": "~0.3.2",
-    "grunt-lib-contrib": "~0.3.1"
+    "gaze": "~0.3.3"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "~0.1.1rc6",
-    "grunt": "~0.4.0rc7"
+    "grunt-contrib-jshint": "~0.1.1",
+    "grunt": "~0.4.0"
   },
   "keywords": [
     "gruntplugin",
