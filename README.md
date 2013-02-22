@@ -13,7 +13,7 @@ npm install grunt-hub
 cp -R node_modules/grunt-hub/tasks/init/hub/* .
 ```
 
-Then edit the grunt.js file to point to your other Grunt projects and run:
+Then edit the Gruntfile file to point to your other Grunt projects and run:
 `grunt` or `grunt watch`.
 
 ### Integrate With an Existing Grunt Project
