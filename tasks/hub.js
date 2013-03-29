@@ -30,7 +30,10 @@ module.exports = function(grunt) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
         // Skip it's own gruntfile. Prevents infinite loops.
-        if (gruntfile === ownGruntfile) { return; }
+        if (gruntfile === ownGruntfile) { 
+          n();
+          return; 
+        }
 
         grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
 
