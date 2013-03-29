@@ -23,6 +23,16 @@ module.exports = function(grunt) {
     // Get it's own gruntfile
     var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
+    
+    var numProcesses = 0;
+    
+    function completeSpawnedProcess ( ) {
+      numProcesses--;
+      if(numProcesses === 0) {
+        var withoutErrors = (errorCount === 0);
+        done(withoutErrors);
+      }
+    }
 
     grunt.util.async.forEachSeries(this.files, function(files, next) {
       var gruntfiles = grunt.file.expand({filter: 'isFile'}, files.src);
@@ -30,9 +40,14 @@ module.exports = function(grunt) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
         // Skip it's own gruntfile. Prevents infinite loops.
-        if (gruntfile === ownGruntfile) { return; }
+        if (gruntfile === ownGruntfile) { 
+          n();
+          return; 
+        }
 
         grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
+        
+        numProcesses++;
 
         // Spawn the tasks
         grunt.util.spawn({
@@ -48,12 +63,13 @@ module.exports = function(grunt) {
             grunt.log.error(res.stderr);
           }
           grunt.log.writeln(res.stdout).writeln('');
-          n();
+          
+          completeSpawnedProcess();
         });
+        
+        n();
+        
       }, next);
-    }, function () {
-      var withoutErrors = (errorCount === 0);
-      done(withoutErrors);
     });
 
   });
