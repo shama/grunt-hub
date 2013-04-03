@@ -10,18 +10,19 @@ module.exports = function(grunt) {
   grunt.initConfig({
     hub: {
       all: {
-        src: ['../*/grunt.js'],
-        tasks: ['lint']
+        src: ['../*/Gruntfile.js'],
+        tasks: ['jshint']
       }
     },
     watch: {
       all: {
-        files: ['<config:hub.all.files>'],
-        tasks: ['lint']
+        files: ['<%= hub.all.files %>'],
+        tasks: ['jshint']
       }
     }
   });
 
   grunt.loadNpmTasks('grunt-hub');
+
   grunt.registerTask('default', ['hub']);
 };
