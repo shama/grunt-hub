@@ -24,11 +24,22 @@ module.exports = function(grunt) {
     var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
     
-    var numProcesses = 0;
+    var childProcesses = [];
+    var lastGruntFileWritten;
     
-    function completeSpawnedProcess ( ) {
-      numProcesses--;
-      if(numProcesses === 0) {
+    function write ( gruntfile, buf, isError ) {
+      var id = gruntfile === lastGruntFileWritten ? '   ' : ('\u001b[36m>> \u001b[0m' + gruntfile + ':\n');
+      if(isError) {
+        grunt.log.error(id + buf);
+      } else {
+        grunt.log.writeln(id + buf);
+      }
+      lastGruntFileWritten = gruntfile;
+    }
+      
+    function completeSpawnedProcess ( child ) {
+      childProcesses.splice(childProcesses.indexOf(child), 1);
+      if(childProcesses.length === 0) {
         var withoutErrors = (errorCount === 0);
         done(withoutErrors);
       }
@@ -46,11 +57,9 @@ module.exports = function(grunt) {
         }
 
         grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
-        
-        numProcesses++;
 
         // Spawn the tasks
-        grunt.util.spawn({
+        var child = grunt.util.spawn({
           // Use the node that spawned this process
           cmd: process.argv[0],
           // Run from dirname of gruntfile
@@ -58,14 +67,21 @@ module.exports = function(grunt) {
           // Run grunt this process uses, append the task to be run and any cli options
           args: grunt.util._.union([process.argv[1]].concat(tasks), cliArgs)
         }, function(err, res, code) {
-          if (code !== 0) {
+          if(err) {
             errorCount++;
-            grunt.log.error(res.stderr);
-          }
-          grunt.log.writeln(res.stdout).writeln('');
-          
-          completeSpawnedProcess();
+          }    
+          completeSpawnedProcess(child);
         });
+        
+        child.stdout.on('data', function ( buf ) {
+          write(gruntfile, buf);
+        });
+        
+        child.stderr.on('data', function ( buf ) {
+          write(gruntfile, buf);
+        });
+        
+        childProcesses.push(child);
         
         n();
         
