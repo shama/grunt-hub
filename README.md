@@ -72,13 +72,20 @@ grunt.initConfig({
   hub: {
     all: {
       src: ['../*/Gruntfile.js'],
-      tasks: ['jshint', 'nodeunit']
-    }
-  }
+      tasks: ['jshint', 'nodeunit'],
+    },
+  },
 });
 ```
 
 If `tasks` were omitted, it will run the `default` tasks.
+
+#### options
+
+##### `concurrent`
+Default: `3`
+
+Set to the number of concurrent task runs to spawn.
 
 ### `watch` task
 
@@ -95,9 +102,9 @@ grunt.initConfig({
   watch: {
     all: {
       files: ['../*/Gruntfile.js'],
-      tasks: ['jshint', 'nodeunit']
-    }
-  }
+      tasks: ['jshint', 'nodeunit'],
+    },
+  },
 });
 ```
 or if you're using the above `hub` config and would like to run all the watch
@@ -106,8 +113,8 @@ targets of the projects, use:
 ```javascript
 grunt.initConfig({
   watch: {
-    files: '<%= hub.all.src %>'
-  }
+    files: '<%= hub.all.src %>',
+  },
 });
 ```
 
@@ -117,6 +124,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.5.0 Run hub tasks in parallel. Add concurrent option to hub. Better error handling/printing. Thanks @plestik!
 * 0.4.0 Support for Grunt v0.4.
 * 0.3.6 Propagate exit codes. Thanks @wachunga!
 * 0.3.5 Update for latest grunt. Thanks @akinofftz!

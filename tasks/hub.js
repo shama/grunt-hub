@@ -12,75 +12,66 @@ module.exports = function(grunt) {
   var path = require('path');
 
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
-    var options = this.options();
+    var options = this.options({
+      concurrent: 3,
+    });
     grunt.verbose.writeflags(options, 'Options');
 
     var done = this.async();
     var errorCount = 0;
-    var tasks = this.data.tasks || 'default';
     // Get process.argv options without grunt.cli.tasks to pass to child processes
     var cliArgs = grunt.util._.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
     // Get it's own gruntfile
     var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
 
-    var childProcesses = [];
     var lastGruntFileWritten;
-
     function write(gruntfile, buf, isError) {
       var id = gruntfile === lastGruntFileWritten ? '   ' : ('>> '.cyan + gruntfile + ':\n');
-      if (isError) {
-        grunt.log.error(id + buf);
-      } else {
-        grunt.log.writeln(id + buf);
-      }
+      grunt.log[(isError) ? 'error' : 'writeln'](id + buf);
       lastGruntFileWritten = gruntfile;
     }
 
-    function completeSpawnedProcess(child) {
-      childProcesses.splice(childProcesses.indexOf(child), 1);
-      if (childProcesses.length === 0) {
-        var withoutErrors = (errorCount === 0);
-        done(withoutErrors);
-      }
-    }
+    // our queue for concurrently ran tasks
+    var queue = grunt.util.async.queue(function(run, next) {
+      grunt.log.ok('Running [' + run.tasks + '] on ' + run.gruntfile);
+      var child = grunt.util.spawn({
+        // Use grunt to run the tasks
+        grunt: true,
+        // Run from dirname of gruntfile
+        opts: {cwd: path.dirname(run.gruntfile)},
+        // Run task to be run and any cli options
+        args: run.tasks.concat(cliArgs || [])
+      }, function(err, res, code) {
+        if (err) { errorCount++; }
+        next();
+      });
+      child.stdout.on('data', function(buf) {
+        write(run.gruntfile, buf);
+      });
+      child.stderr.on('data', function(buf) {
+        write(run.gruntfile, buf, true);
+      });
+    }, options.concurrent);
 
-    grunt.util.async.forEachSeries(this.files, function(files, next) {
+    // When the queue is all done
+    queue.drain = function() {
+      done((errorCount === 0));
+    };
+
+    this.files.forEach(function(files) {
       var gruntfiles = grunt.file.expand({filter: 'isFile'}, files.src);
-      grunt.util.async.forEachSeries(gruntfiles, function(gruntfile, n) {
+      gruntfiles.forEach(function(gruntfile) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
         // Skip it's own gruntfile. Prevents infinite loops.
-        if (gruntfile === ownGruntfile) { return n(); }
+        if (gruntfile === ownGruntfile) { return; }
 
-        grunt.log.ok('Running [' + tasks + '] on ' + gruntfile);
-
-        // Spawn the tasks
-        var child = grunt.util.spawn({
-          // Use the node that spawned this process
-          cmd: process.argv[0],
-          // Run from dirname of gruntfile
-          opts: {cwd: path.dirname(gruntfile)},
-          // Run grunt this process uses, append the task to be run and any cli options
-          args: grunt.util._.union([process.argv[1]].concat(tasks), cliArgs)
-        }, function(err, res, code) {
-          if (err) { errorCount++; }
-          completeSpawnedProcess(child);
+        queue.push({
+          gruntfile: gruntfile,
+          tasks: files.tasks || ['default']
         });
-
-        child.stdout.on('data', function(buf) {
-          write(gruntfile, buf);
-        });
-
-        child.stderr.on('data', function(buf) {
-          write(gruntfile, buf, true);
-        });
-
-        childProcesses.push(child);
-
-        n();
-
-      }, next);
+      });
     });
 
   });
