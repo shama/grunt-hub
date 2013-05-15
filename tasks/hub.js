@@ -27,8 +27,12 @@ module.exports = function(grunt) {
 
     var lastGruntFileWritten;
     function write(gruntfile, buf, isError) {
-      var id = gruntfile === lastGruntFileWritten ? '' : ('>> '.cyan + gruntfile + ':\n');
-      grunt.log[(isError) ? 'error' : 'write'](id + buf);
+      if (gruntfile !== lastGruntFileWritten) {
+        grunt.log.writeln('');
+        grunt.log.writeln('');
+        grunt.log.writeln('>> '.cyan + gruntfile + ':\n');
+      }
+      grunt.log[(isError) ? 'error' : 'write'](buf);
       lastGruntFileWritten = gruntfile;
     }
 
