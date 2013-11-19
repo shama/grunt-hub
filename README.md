@@ -50,7 +50,7 @@ and a `stop.sh` script:
 
 ```sh
 #!/bin/sh
-ps -ef | sed -n '/grunt/{/grep/!p;}' | awk '{print$2}' | xargs -i kill {}
+ps -ef | sed -n '/grunt/{/grep/!p;}' | awk '{print$2}' | xargs -I kill {}
 echo "Grunt Hub Stopped"
 ```
 
