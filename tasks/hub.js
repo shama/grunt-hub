@@ -14,6 +14,7 @@ module.exports = function(grunt) {
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
     var options = this.options({
       concurrent: 3,
+      allowSelf: false
     });
     grunt.verbose.writeflags(options, 'Options');
 
@@ -69,7 +70,7 @@ module.exports = function(grunt) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
         // Skip it's own gruntfile. Prevents infinite loops.
-        if (gruntfile === ownGruntfile) { return; }
+        if (!options.allowSelf && gruntfile === ownGruntfile) { return; }
 
         queue.push({
           gruntfile: gruntfile,
