@@ -87,6 +87,26 @@ Default: `3`
 
 Set to the number of concurrent task runs to spawn.
 
+##### `allowSelf`
+Default: `false`
+
+By default, hub will skip its own Gruntfile. Set to `true` to allow hub to
+include itself.
+
+**Note:** Only set this for tasks which are not part of the `default`
+task of their respective Gruntfile, or an infinite loop will occur.
+
+```
+hub: {
+  all: {
+    options: {
+      allowSelf: true
+    },
+    src: ['./Gruntfile.js', '../client1/Gruntfile.js', '../client2/Gruntfile.js']
+  }
+}
+```
+
 ### `watch` task
 
 The watch task is for watching multiple Grunt projects and triggering tasks on
