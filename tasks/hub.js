@@ -10,6 +10,9 @@ module.exports = function(grunt) {
   'use strict';
 
   var path = require('path');
+  var chalk = require('chalk');
+  var async = require('async');
+  var _ = require('lodash')
 
   grunt.registerMultiTask('hub', 'Run multiple grunt projects', function() {
     var options = this.options({
@@ -20,7 +23,7 @@ module.exports = function(grunt) {
     var done = this.async();
     var errorCount = 0;
     // Get process.argv options without grunt.cli.tasks to pass to child processes
-    var cliArgs = grunt.util._.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
+    var cliArgs = _.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
     // Get it's own gruntfile
     var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile);
@@ -30,14 +33,14 @@ module.exports = function(grunt) {
       if (gruntfile !== lastGruntFileWritten) {
         grunt.log.writeln('');
         grunt.log.writeln('');
-        grunt.log.writeln('>> '.cyan + gruntfile + ':\n');
+        grunt.log.writeln(chalk.cyan('>> ') + gruntfile + ':\n');
       }
       grunt.log[(isError) ? 'error' : 'write'](buf);
       lastGruntFileWritten = gruntfile;
     }
 
     // our queue for concurrently ran tasks
-    var queue = grunt.util.async.queue(function(run, next) {
+    var queue = async.queue(function(run, next) {
       grunt.log.ok('Running [' + run.tasks + '] on ' + run.gruntfile);
       var child = grunt.util.spawn({
         // Use grunt to run the tasks
