@@ -21,7 +21,6 @@
       "url": "https://github.com/shama/grunt-hub/blob/master/LICENSE-MIT"
     }
   ],
-  "main": "Gruntfile.js",
   "engines": {
     "node": ">= 0.8.0"
   },
