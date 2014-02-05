@@ -1,7 +1,7 @@
 {
   "name": "grunt-hub",
   "description": "A Grunt task to watch and run tasks on multiple Grunt projects",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "homepage": "https://github.com/shama/grunt-hub",
   "author": {
     "name": "Kyle Robinson Young",
