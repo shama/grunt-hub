@@ -16,7 +16,6 @@ module.exports = function(grunt) {
       concurrent: 3,
       allowSelf: false
     });
-    grunt.verbose.writeflags(options, 'Options');
 
     var done = this.async();
     var errorCount = 0;
