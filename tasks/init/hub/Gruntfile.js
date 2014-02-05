@@ -2,7 +2,7 @@
  * Example Grunt Hub
  *
  * Edit the hub.all.src to point to your Gruntfile locations.
- * Then run `grunt` or `grunt watch`.
+ * Then run `grunt`.
  */
 module.exports = function(grunt) {
   'use strict';
@@ -11,15 +11,9 @@ module.exports = function(grunt) {
     hub: {
       all: {
         src: ['../*/Gruntfile.js'],
-        tasks: ['jshint']
-      }
+        tasks: ['jshint'],
+      },
     },
-    watch: {
-      all: {
-        files: ['<%= hub.all.files %>'],
-        tasks: ['jshint']
-      }
-    }
   });
 
   grunt.loadNpmTasks('grunt-hub');
