@@ -14,7 +14,7 @@ cp -R node_modules/grunt-hub/tasks/init/hub/* .
 ```
 
 Then edit the Gruntfile file to point to your other Grunt projects and run:
-`grunt` or `grunt watch`.
+`grunt hub`.
 
 ### Integrate With an Existing Grunt Project
 
@@ -42,7 +42,7 @@ A simple way is to use `nohup` and create a `start.sh` script:
 ```sh
 #!/bin/sh
 DIR=`dirname $0`
-/usr/bin/nohup /usr/local/bin/grunt --base $DIR watch --no-color &
+/usr/bin/nohup /usr/local/bin/grunt --base $DIR hub --no-color &
 echo "Grunt Hub Started"
 ```
 
@@ -102,40 +102,9 @@ hub: {
     options: {
       allowSelf: true
     },
-    src: ['./Gruntfile.js', '../client1/Gruntfile.js', '../client2/Gruntfile.js']
-  }
-}
-```
-
-### `watch` task
-
-The watch task is for watching multiple Grunt projects and triggering tasks on
-the respective Grunt project as files are edited. This watch task will read each
-project's Gruntfile. If you specify `tasks` it will run only those tasks
-otherwise if no `tasks` are specified it will run all and each of the project's
-watch targets.
-
-To specify which Gruntfiles this watch task should read use:
-
-```javascript
-grunt.initConfig({
-  watch: {
-    all: {
-      files: ['../*/Gruntfile.js'],
-      tasks: ['jshint', 'nodeunit'],
-    },
+    src: ['./Gruntfile.js', '../client1/Gruntfile.js', '../client2/Gruntfile.js'],
   },
-});
-```
-or if you're using the above `hub` config and would like to run all the watch
-targets of the projects, use:
-
-```javascript
-grunt.initConfig({
-  watch: {
-    files: '<%= hub.all.src %>',
-  },
-});
+},
 ```
 
 ## Contributing
