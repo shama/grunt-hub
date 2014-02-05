@@ -138,6 +138,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.6.0 Removed unneeded watch task. Fix issue with Gruntfiles not named Gruntfile. Removed deprecated grunt.util libs.
 * 0.5.0 Run hub tasks in parallel. Add concurrent option to hub. Better error handling/printing. Thanks @plestik!
 * 0.4.0 Support for Grunt v0.4.
 * 0.3.6 Propagate exit codes. Thanks @wachunga!
