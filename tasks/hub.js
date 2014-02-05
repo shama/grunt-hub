@@ -49,7 +49,7 @@ module.exports = function(grunt) {
         // Run from dirname of gruntfile
         opts: {cwd: path.dirname(run.gruntfile)},
         // Run task to be run and any cli options
-        args: run.tasks.concat(cliArgs || [])
+        args: run.tasks.concat(cliArgs || [], '--gruntfile=' + run.gruntfile)
       }, function(err, res, code) {
         if (err) { errorCount++; }
         next();
