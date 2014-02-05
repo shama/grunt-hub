@@ -28,7 +28,6 @@
     "test": "grunt nodeunit -v"
   },
   "dependencies": {
-    "gaze": "~0.3.3"
   },
   "devDependencies": {
     "grunt-contrib-jshint": "~0.1.1",
