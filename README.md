@@ -99,6 +99,8 @@ grunt.initConfig({
 
 If `tasks` were omitted, it will run the `default` tasks.
 
+You can override tasks on the cli with args: `grunt hub:all:watch` will run the `watch` task on all projects instead of `jshint, nodeunit`.
+
 #### options
 
 ##### `concurrent`
@@ -125,6 +127,10 @@ hub: {
   },
 },
 ```
+
+## Where did the `watch` task go?
+
+It isn't necessary. Just `npm install grunt-contrib-watch --save-dev` into your project folders. Then either add the `watch` task to your tasks list in your hub task config. Or run with `grunt hub:target:watch`.
 
 ## Contributing
 

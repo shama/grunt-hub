@@ -19,6 +19,7 @@ module.exports = function(grunt) {
       concurrent: 3,
       allowSelf: false
     });
+    var args = (this.args.length < 1) ? false : this.args;
 
     var done = this.async();
     var errorCount = 0;
@@ -76,7 +77,7 @@ module.exports = function(grunt) {
 
         queue.push({
           gruntfile: gruntfile,
-          tasks: files.tasks || ['default']
+          tasks: args || files.tasks || ['default']
         });
       });
     });
