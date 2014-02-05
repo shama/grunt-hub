@@ -57,6 +57,25 @@ echo "Grunt Hub Stopped"
 Put these in your grunt-hub folder and run `./start.sh` to start and
 `./stop.sh` to stop.
 
+### Using [forever](https://npmjs.org/package/forever)
+
+`forever` is a another great way to watch multiple grunt projects forever.
+
+* Install `npm install forever grunt grunt-cli grunt-hub --save-dev`
+* Add a start script to your `package.json`:
+
+```json
+{
+  "name": "my-grunt-hub",
+  "version": "0.1.0",
+  "scripts": {
+    "start": "forever ./node_modules/.bin/grunt hub"
+  }
+}
+```
+
+* Now you can start your hub with `npm start`.
+
 ## Configuring
 
 This plugin includes a `hub` task and overrides the `watch` task.
@@ -128,7 +147,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## License
 
-Copyright (c) 2013 Kyle Robinson Young
+Copyright (c) 2013 Kyle Robinson Young  
 Licensed under the MIT license.
 
 
