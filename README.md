@@ -138,6 +138,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* 0.6.2 Fix syntax error. Thanks @eugeneiiim!
 * 0.6.1 Fix path.resolve must be strings for ownGruntfile. Thanks @terribleplan!
 * 0.6.0 Removed unneeded watch task. Fix issue with Gruntfiles not named Gruntfile. Removed deprecated grunt.util libs. Ability to override tasks via the cli.
 * 0.5.0 Run hub tasks in parallel. Add concurrent option to hub. Better error handling/printing. Thanks @plestik!
