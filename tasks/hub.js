@@ -42,7 +42,21 @@ module.exports = function(grunt) {
 
     // our queue for concurrently ran tasks
     var queue = async.queue(function(run, next) {
+      var skipNext = false;
       grunt.log.ok('Running [' + run.tasks + '] on ' + run.gruntfile);
+      if(cliArgs)cliArgs = cliArgs.filter(function (currentValue) {
+        if(skipNext){
+          return (skipNext = false);
+        }
+        var out = /^--gruntfile(=?)/.exec(currentValue);
+        if(out){
+          if(out[1] !== '='){
+            skipNext = true;
+          }
+          return false;
+        }
+        return true;
+      });
       var child = grunt.util.spawn({
         // Use grunt to run the tasks
         grunt: true,
