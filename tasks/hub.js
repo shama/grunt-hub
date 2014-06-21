@@ -24,7 +24,7 @@ module.exports = function(grunt) {
     // Exit if no gruntfiles were found
     var hasGruntfiles = _(this.files).map(function(files) {
       return grunt.file.expand({filter: 'isFile'}, files.src);
-    }).flatten().value()
+    }).flatten().value();
     if (hasGruntfiles.length === 0) {
       grunt.warn('No Gruntfiles matched the given file patterns.');
       return 0;
@@ -53,19 +53,17 @@ module.exports = function(grunt) {
     var queue = async.queue(function(run, next) {
       var skipNext = false;
       grunt.log.ok('Running [' + run.tasks + '] on ' + run.gruntfile);
-      if(cliArgs)cliArgs = cliArgs.filter(function (currentValue) {
-        if(skipNext){
-          return (skipNext = false);
-        }
-        var out = /^--gruntfile(=?)/.exec(currentValue);
-        if(out){
-          if(out[1] !== '='){
-            skipNext = true;
+      if (cliArgs) {
+        cliArgs = cliArgs.filter(function(currentValue) {
+          if (skipNext) return (skipNext = false);
+          var out = /^--gruntfile(=?)/.exec(currentValue);
+          if (out) {
+            if (out[1] !== '=') skipNext = true;
+            return false;
           }
-          return false;
-        }
-        return true;
-      });
+          return true;
+        });
+      }
       var child = grunt.util.spawn({
         // Use grunt to run the tasks
         grunt: true,
