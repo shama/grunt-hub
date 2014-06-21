@@ -90,6 +90,10 @@ module.exports = function(grunt) {
 
     this.files.forEach(function(files) {
       var gruntfiles = grunt.file.expand({filter: 'isFile'}, files.src);
+      // Display a warning if no files were matched
+      if (!gruntfiles.length) {
+        grunt.log.warn('No Gruntfiles matched the file patterns: "' + files.orig.src.join(', ') + '"');
+      }
       gruntfiles.forEach(function(gruntfile) {
         gruntfile = path.resolve(process.cwd(), gruntfile);
 
@@ -102,6 +106,13 @@ module.exports = function(grunt) {
         });
       });
     });
+
+    //After processing all files and queueing them, make sure that at least one file is queued
+    if (queue.idle()) {
+        // If the queue is idle, assume nothing was queued and call done() immediately after sending warning
+        grunt.warn('No Gruntfiles matched any of the provided file patterns');
+        done();
+    }
 
   });
 
