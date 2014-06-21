@@ -21,6 +21,15 @@ module.exports = function(grunt) {
     });
     var args = (this.args.length < 1) ? false : this.args;
 
+    // Exit if no gruntfiles were found
+    var hasGruntfiles = _(this.files).map(function(files) {
+      return grunt.file.expand({filter: 'isFile'}, files.src);
+    }).flatten().value()
+    if (hasGruntfiles.length === 0) {
+      grunt.warn('No Gruntfiles matched the given file patterns.');
+      return 0;
+    }
+
     var done = this.async();
     var errorCount = 0;
     // Get process.argv options without grunt.cli.tasks to pass to child processes
