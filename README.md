@@ -1,6 +1,6 @@
 # grunt-hub
 
-A Grunt task to watch and run tasks on multiple Grunt projects.
+A Grunt task to watch and run tasks on multiple Grunt projects, optionally in order of dependencies between Gruntfiles.
 
 ## Create a Grunt Hub
 
@@ -103,10 +103,28 @@ You can override tasks on the cli with args: `grunt hub:all:watch` will run the 
 
 #### options
 
-##### `concurrent`
-Default: `3`
+##### `dependencyFn`
+Default: no dependencies
 
-Set to the number of concurrent task runs to spawn.
+Set to either a string or a function. If a string, must be one of the supported default dependency functions below. If a function, it will be passed two arguments--(1) an absolute path to a Gruntfile, and (2) an array containing absolute paths to all Gruntfiles matched by the glob--and is expected to return an array of absolute paths to the Gruntfiles the given Gruntfile depends on. (Note: the `hub` task will fail if `dependencyFn` returns a Gruntfile that is not matched by the `src` glob, or if paths returned are not absolute.)
+
+If a `dependencyFn` is specified, then tasks for each Gruntfile will only run once the tasks for all dependent Gruntfiles have completed. If an error occurs running `dependencyFn`, an error is printed, and the task proceeds under the assumption that Gruntfile has no dependencies.
+
+Default dependency functions:
+ * `"bower"` - Attempt to read a `bower.json` from the same directory as the Gruntfile. Any relative paths in `dependencies` or `devDependencies` from that `bower.json` will be searched for Gruntfiles, and any Gruntfiles found will be returned as dependencies.
+   * Example: `projectA/bower.json` has the following lines in its `dependencies`: (`"projectB": "../projectB"`) and (`"projectC": "../projectC"`). The dependencies for `projectA/Gruntfile.js` will then be `["/path/to/projectB/Gruntfile.js", "/path/to/projectC/Gruntfile.js"]`, assuming that both files exist and are in the `src` glob.
+
+##### ~~`concurrent`~~
+~~Default: `3`~~
+
+~~Set to the number of concurrent task runs to spawn.~~
+
+***Currently disabled, pending merge of [caolan/async#637](https://github.com/caolan/async/pull/637).***
+
+##### `bufferOutput`
+Default: `false`
+
+Set to `true` to buffer output of running tasks, and print all output from a task as a batch once it completes.
 
 ##### `allowSelf`
 Default: `false`
