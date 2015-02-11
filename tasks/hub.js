@@ -24,7 +24,7 @@ module.exports = function(grunt) {
     var done = this.async();
     var errorCount = 0;
     // Get process.argv options without grunt.cli.tasks to pass to child processes
-    var cliArgs = _.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks));
+    var cliArgs = _.without.apply(null, [[].slice.call(process.argv, 2)].concat(grunt.cli.tasks)).concat(['--color']);
     // Get it's own gruntfile
     var ownGruntfile = grunt.option('gruntfile') || grunt.file.expand({filter: 'isFile'}, '{G,g}runtfile.{js,coffee}')[0];
     ownGruntfile = path.resolve(process.cwd(), ownGruntfile || '');
