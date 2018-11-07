@@ -1,12 +1,9 @@
 {
   "name": "my-grunt-hub",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A grunt hub",
-  "repository": {
-    "type": "git",
-    "url": "git://github.com/user/repo.git"
-  },
+  "repository": "user/repo",
   "devDependencies": {
-  	"grunt": "~0.4.1"
+    "grunt": "^1.0.3"
   }
 }
