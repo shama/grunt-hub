@@ -46,10 +46,14 @@ module.exports = function(grunt) {
       grunt.log.ok('Running [' + run.tasks + '] on ' + run.gruntfile);
       if (cliArgs) {
         cliArgs = cliArgs.filter(function(currentValue) {
-          if (skipNext) return (skipNext = false);
+          if (skipNext) {
+            return (skipNext = false);
+          }
           var out = /^--gruntfile(=?)/.exec(currentValue);
           if (out) {
-            if (out[1] !== '=') skipNext = true;
+            if (out[1] !== '=') {
+              skipNext = true;
+            }
             return false;
           }
           return true;

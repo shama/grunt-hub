@@ -17,7 +17,7 @@
     "node": ">= 0.8.0"
   },
   "scripts": {
-    "test": "grunt nodeunit -v"
+    "test": "grunt"
   },
   "dependencies": {
     "chalk": "~0.4.0",
@@ -25,8 +25,8 @@
     "lodash": "~4.17.5"
   },
   "devDependencies": {
-    "grunt-contrib-jshint": "~0.8.0",
-    "grunt": "~0.4.0"
+    "grunt-contrib-jshint": "^2.0.0",
+    "grunt": "^1.0.3"
   },
   "keywords": [
     "gruntplugin",
