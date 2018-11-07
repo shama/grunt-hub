@@ -138,6 +138,7 @@ Please open an issue or send a pull request. Thanks!
 
 ## Release History
 
+* Please view the [commit history](https://github.com/shama/grunt-hub/commits/master) for future release history.
 * 0.7.0 Update async to ~0.9.0, warn when files not found and finish task when idle. Thanks @dylancwood!
 * 0.6.2 Fix syntax error. Thanks @eugeneiiim!
 * 0.6.1 Fix path.resolve must be strings for ownGruntfile. Thanks @terribleplan!
